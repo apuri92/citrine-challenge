@@ -18,12 +18,14 @@ nDim = cnstrnt.get_ndim()
 itr = 0
 np.random.seed(1234)
 while itr < nPts:
-    x = np.random.rand(nDim)
+    x = np.random.rand(nDim)*0.2
+    # print(x)
     if cnstrnt.apply(x):
         out.write(str(x)+'\n')
+        print(f'found {itr}')
         itr+=1
 
-print(f'Done! Closing {outputFile}')
+print(f'Done! Closing {outputFile}\n')
 out.close()
 
 
