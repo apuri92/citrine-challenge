@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
- 
 from constraints import Constraint
 import numpy as np
 import sys
@@ -17,9 +16,10 @@ cnstrnt = Constraint(inputFile)
 nDim = cnstrnt.get_ndim()
 itr = 0
 np.random.seed(1234)
+
+# sample from hypercube continuously till required points are obtained
 while itr < nPts:
     x = np.random.rand(nDim)*0.2
-    # print(x)
     if cnstrnt.apply(x):
         out.write(str(x)+'\n')
         print(f'found {itr}')
