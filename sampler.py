@@ -28,19 +28,23 @@ def PlotPoints3D(pointsExplored, dim0=0, dim1=1, dim2=2):
     ax.scatter3D(xs, ys, zs, c=zs, cmap='hsv')
     plt.xlim([0,1])
     plt.ylim([0,1])
-    plt.show()
+    # plt.show()
 
 # Utility to plot points in 2D
-def PlotPoints(pointsExplored, dim0=0, dim1=1):
+def PlotPoints(pointsExplored, filename, dim0=0, dim1=1):
     xs=[]
     ys=[]
     for _ in pointsExplored:
         xs.append(_[dim0])
         ys.append(_[dim1])
 
-    plt.scatter(xs, ys)
+    plt.scatter(xs, ys,marker='o', c='#1f2db4')
     plt.xlim([0,1])
     plt.ylim([0,1])
+    plt.xlabel(f'x[{dim0}]')
+    plt.ylabel(f'x[{dim1}]')
+    plt.title(f'Total points used = {len(pointsExplored)}')
+    plt.savefig(f'./images/{filename}_len{len(pointsExplored)}')
     plt.show()
 
 
@@ -73,7 +77,7 @@ def GenerateValidPoints(inputFileName='example.txt', outputFileName='exampleOut.
     startingPoint = tuple(cnstrnts.get_example())
     
     # This will the step size with which the exploration will be done.
-    stepSize = 1.0/5
+    stepSize = 1.0
 
     # Setup the set to mark points that are explored and a queue to hold the points that need to be explored
     pointsExplored = set()
@@ -90,7 +94,6 @@ def GenerateValidPoints(inputFileName='example.txt', outputFileName='exampleOut.
         
         # Search will begin from the given sample point so add it to the queue.
         pointsQueue.append(startingPoint)
-
         # Break if the step size becomes too small.
         # This will typically happen when points are not being found or the number of points requested is too large
         if stepSize <= 0.00000000001:
@@ -132,10 +135,16 @@ def GenerateValidPoints(inputFileName='example.txt', outputFileName='exampleOut.
             # Once all valid points associated to the current point are added to the queue, the current point is marked as explored.
             pointsExplored.add(currPoint)
             
+            # if len(pointsExplored) < 50:
+            #     PlotPoints(pointsExplored, inputFileName.split('/')[-1][:-4])
+
+            # if len(pointsExplored) % 100 == 0:
+            #     PlotPoints(pointsExplored, inputFileName.split('/')[-1][:-4])
+            
             # End of inner while loop.
 
         # Halve stepSize after all points with current stepSize within constraints are found and being search again.
-        stepSize /= 5
+        stepSize /= 2
 
         # End of outer while loop.
 
@@ -146,7 +155,7 @@ def GenerateValidPoints(inputFileName='example.txt', outputFileName='exampleOut.
             out.write(" ".join(map(str, _))+'\n')
 
     print(f'Found {len(pointsExplored)} valid points for constraints in {inputFileName}. These are saved to {outputFileName}')
-    PlotPoints(pointsExplored)
+    
     
     return 0
 
