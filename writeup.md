@@ -61,7 +61,7 @@ This code finds 1000 points in under 5 seconds for each given sample dataset.
 | formulation   | 0.0272        | 4             | 1000              |
 | alloy.txt     | 0.3253        | 11            | 1000              |
 
-The memory usage for alloy.txt (calculated using [`memory-profiler`](https://pypi.org/project/memory-profiler/) is shown below:
+The memory usage for alloy.txt (calculated using [`memory-profiler`](https://pypi.org/project/memory-profiler/)) is shown below:
 ![memoryUsage](images/mprof_plot_alloys.png)
 
 ---
