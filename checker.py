@@ -41,9 +41,9 @@ class Checker:
                     log_checker.error(f'error for point: {x}, {sys.exc_info()[1]}')
                     pass
                 
-            # log if number of points is less than expected
+            # Log warning if number of points is less than expected
             if total < expected:
                 log_checker.warning(f'{total} points less than expected {expected}')
             
-            # log summary for file
+            # Log summary for file
             log_checker.info(f'passed: {passed}, failed: {failed}, total: {total}, expected: {expected}\n')
