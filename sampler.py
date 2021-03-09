@@ -1,28 +1,21 @@
 #!/usr/bin/env python3
-import sys
-from sampler_class import Sampler
+import logging
+from sampler_class import *
+from checker_class import *
 
-
-if __name__ == '__main__':
+def main():
     input_file_name = sys.argv[1]
     output_file_name = sys.argv[2]
     n_points = int(sys.argv[3])
     
-    
-    # Create Sampler object for input_file_name
+    # Create Sampler object for input_file_name, generate required number of points and write them to a file
     sampler = Sampler(input_file_name)
-    
-    # Generate required number of points fulfilling constraints and write them to file
     sampler.generate_valid_points(n_points)
     sampler.write_to_file(output_file_name)
 
-    # Run checker to test output files
+    # Run checker to test input<->output file has expected number of points.
+    checker = Checker()
+    checker.check_output_file(input_file_name, output_file_name, n_points)
 
-    # # Checking the answers in the output file and writing to test/logfile.
-    # if check_output_file(input_file_name, output_file_name):
-    #     print('all tests passed')
-    # else:
-    #     print('check results')    
-    
-
-
+if __name__ == '__main__':
+    main()

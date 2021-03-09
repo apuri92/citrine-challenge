@@ -1,8 +1,10 @@
 from constraints import Constraint
 from collections import deque
-import sys
-import logging
-logging.basicConfig(filename='logs_Sampler.log', level=logging.DEBUG)
+import sys, logging
+from setup_logging import setup_logger
+
+setup_logger('log_sampler.log')
+log_sampler = logging.getLogger('log_sampler.log')
 
 class Sampler:
     """
@@ -12,14 +14,18 @@ class Sampler:
     # Initialize with input_file_name that is used to set up the constraints.
     def __init__(self, input_file_name):
         
+        # Input file that contains the constraints
         self.input_file_name = input_file_name
+        
         # Define set to hold the set of required points
         self.point_set = set()
 
+        log_sampler.info(f'Setting up sampler: {self.input_file_name}')
 
+    # Generate_valid_points uses a form of breadth first search to generate n points satisfying the constraints defined in input_file_name.
     def generate_valid_points(self, n_points, min_step_size=0.0000000000001):
-        logging.info(f'Generating points for {self.input_file_name}')
-        logging.info(f'required points: {n_points}, min_step_size: {min_step_size}')
+        log_sampler.info(f'Constraints: {self.input_file_name}')
+        log_sampler.info(f'Points required: {n_points}, min_step_size: {min_step_size}')
         
         # Get dimensionality and starting point of the problem from the input file.
         # The starting_point is cast as a tuple because hashing will be required to put the found points into a set.
@@ -36,7 +42,7 @@ class Sampler:
         # Run while number of points found is less than the number of points requested
         while len(self.point_set) < n_points:
 
-            logging.info(f'step_size: {step_size}, valid points found: {len(self.point_set)}')
+            log_sampler.debug(f'step_size: {step_size}, valid points found: {len(self.point_set)}')
            
             # Search will begin from the given sample point so add it to the queue.
             points_queue.append(starting_point)
@@ -44,7 +50,7 @@ class Sampler:
             # Break if the step size becomes smaller than the min_step_size.
             # This will typically happen when the valid points are too close to the sample point or the number of points requested is too large.
             if step_size < min_step_size:
-                logging.warning(f'Step size: {step_size}, breaking search for more points')            
+                log_sampler.warning(f'Step size: {step_size}, breaking search for more points')            
                 break
 
             # Run while the queue exists and more points are required.
@@ -71,28 +77,29 @@ class Sampler:
                         next_point = tuple(next_point)
                         
                         # Add point to queue if the point is within the unit hypercube and constraints met.
-                        # This is done in a try/except since there may be a divide by zero error when checking constraints on a point.
-                        # If there is a divide by zero, the point is not added to the queue and the script can continue.
+                        # If there is a ZeroDivisionError exception, a warning is logged.
+                        # Other exceptions are unexpected and are logged as errors.
                         try:
                             if self.unit_cube_check(next_point) and constraints.apply(next_point) and next_point not in self.point_set:
                                 points_queue.append(next_point)
+                        except ZeroDivisionError:
+                            log_sampler.warning(f'{sys.exc_info()[1]} for {next_point}')
                         except:
-                            logging.warning(f'error for point: {next_point}, {sys.exc_info()[:2]}')
-                            pass
+                            log_sampler.error(f'{sys.exc_info()[1]} for {next_point}')
                 
                 # Once all valid points associated to the current point are added to the queue, the current point is marked as explored.
                 self.point_set.add(current_point)
 
                 # End of inner while loop.
 
-            # Halve step_size after all points with current step_size within constraints are found and being search again.
+            # Halve step_size after all points with current step_size within constraints are found and begin search again.
             step_size /= 2
 
             # End of outer while loop.
 
-        logging.info(f'Total points found: {len(self.point_set)}\n')
+        # log the total number of points found
+        log_sampler.info(f'Points found: {len(self.point_set)}')
 
-        
 
 
     # Setup output file and write coordinates to it. File is closed automatically.
@@ -100,7 +107,8 @@ class Sampler:
         with open(output_file_name, "w") as out:
             for _ in self.point_set:
                 out.write(" ".join(map(str, _))+'\n')
-        logging.info(f'Writing points: {self.input_file_name} -> {output_file_name}\n')
+
+        log_sampler.info(f'Writing output: {self.input_file_name} -> {output_file_name}')
 
 
     # Utility to check if point is within the unit hypercube.
