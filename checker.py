@@ -3,17 +3,17 @@ from math import log10, floor
 import logging
 from setup_logging import setup_logger
 
-setup_logger('log_checker.log', level=logging.INFO)
-log_checker = logging.getLogger('log_checker.log')
+setup_logger('log_validator.log', level=logging.INFO)
+log_validator = logging.getLogger('log_validator.log')
 
-class Checker:
+class Validator:
     """
-    Checker class to check output file against constraints in input file
+    Validator class to check output file against constraints in input file
     """
 
     # checks output file against constraint file to see if required number of points available
     def check_output_file(self, constraints_file, points_file, expected):
-        log_checker.info(f'running check: {constraints_file} <-> {points_file}')
+        log_validator.info(f'running check: {constraints_file} <-> {points_file}')
         constraints = Constraint(constraints_file)
 
         with open(points_file) as f:
@@ -25,7 +25,7 @@ class Checker:
                 
                 # Log how many points have been checked.
                 if itr !=0 and (itr % pow(10, floor(log10(itr+1))) == 0):
-                    log_checker.debug(f'Checked {itr}')
+                    log_validator.debug(f'Checked {itr}')
                 
                 # Count number of points in file
                 generated+=1
@@ -35,17 +35,17 @@ class Checker:
                     if constraints.apply(x):
                         passed+=1
                     else:
-                        log_checker.warning(f'outside constraints: {x}')
+                        log_validator.warning(f'outside constraints: {x}')
                         failed+=1
                 except:
-                    log_checker.error(f'error for point: {x}, {sys.exc_info()[1]}')
+                    log_validator.error(f'error for point: {x}, {sys.exc_info()[1]}')
                     pass
                 
             # Log warning if number of points is less than expected
             if generated < expected:
-                log_checker.warning(f'{generated} points less than expected {expected}')
+                log_validator.warning(f'{generated} points less than expected {expected}')
             
             # Log summary for file
-            log_checker.info(f'{passed} passed, {failed} failed')
-            log_checker.info(f'{generated} generated, {expected} expected\n')
+            log_validator.info(f'{generated} generated, {expected} expected\n')
+            log_validator.info(f'{passed} passed, {failed} failed')
 

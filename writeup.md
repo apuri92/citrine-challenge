@@ -14,31 +14,35 @@ The script can be run as below:
 
 ```./sampler.py input_file output_file 1000```
 
-It will take in an input_file with the dimensionality, the single feasible point, and the constraints, and write 1000 points that satisfy those constraints to an output_file.
-Note: The print() statements in the script have been commented out.
+It uses a Generator class to generate the required number of points that sastisfy the given constrants. These are then written to the specified output file. The script also uses a Validator class to verify that the generated points in the output file satisfy the constraints in the corresponding input file.
+
+The following log files are produced:
+* log_generator.log contains information from the point generation
+* log_validator.log contains information from validating the output file
 
 ### Explanation
-The idea of a bread-first search (BFS) is used to solve this problem. The script starts with with the given feasible sample point and expands outward (incrementing and decrementing by a particular step size) in each dimension. Any valid points that are found are added to a queue. This exploration is done for each point in the queue, after which it is added to the set of feasible points. Once the available space is explored, the step size is reduced by half, and the exploration is started from the given sample point again. This procedure is repeated until the required number of points are found.
-
+The script starts with with the given feasible sample point and explores outward (incrementing and decrementing by a particular step size) in each dimension. Any valid points found are added to the queue explored and added to the set of valid points. This exploration is done till the queue is empty. The step size is then halved and the search is re-done on a queue that contains the valid points found so far.
 
 ### Pseudocode
 ```
-while (number of found points < number of required points)
-	add the given feasible point to a queue
-	
-	while (queue exists) and (number of found points < number of required points)
-		currentPoint = popleft from queue
-		if currentPoint in exploredPoints and currentPoint != feasiblePoint:
-            continue
-        for each dimension in current point:
-			explore outward with a particular step size
+step_size = 1
+while (n_found_points < n_required_points):
+	queue.add(all points in valid_points)
+
+	while queue and (n_found_points < n_required_points):
+		current_point = queue.popleft()
+        
+        for each dimension in current_point:
+            for positive and negative direction:
+			    next_point = explore(current_point)
 			
-            if point is feasible:
-                add to queue
+                if next_point is valid:
+                    queue.add(next_point)
 		
-        add currentPoint to exploredPoints set
+        valid_points.add(current_point)
 	
-    halve the step size and repeat search
+    step_size /= 2
+    
 ```
 
 At the end of this loop, the exploredPoints set will contain the required number of valid points.
@@ -69,5 +73,6 @@ The memory usage for alloy.txt (calculated using [`memory-profiler`](https://pyp
 ## Drawbacks:
 * An initial point is required to begin the search
 * The memory footprint will be large for high dimensional problems where many points are required
-* The points that are found will be fill the valid space but may not do it uniformly in all dimensions
+* The points filled at the smallest step size may not be uniform in all dimensions
 * If the valid region is discontinuous, all subregions may not be found
+* Floating point errors can happen

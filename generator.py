@@ -26,61 +26,60 @@ class Generator:
         log_generator.info(f'Setting up generator: {self.input_file_name}')
 
     # Generate_valid_points uses a form of breadth first search to generate n points satisfying the constraints defined in input_file_name.
-    def generate_valid_points(self, n_points, min_step_size=0.0000000000001):
+    def generate_valid_points(self, n_points, min_step_size=1E-30):
         log_generator.info(f'Constraints: {self.input_file_name}')
         log_generator.info(f'Points required: {n_points}, min_step_size: {min_step_size}')
         
-        # Get dimensionality and starting point of the problem from the input file.
-        # The starting_point is cast as a tuple because hashing will be required to put the found points into a set.
+        # Set up the constraints object and get the dimensionality and starting point.
         constraints = Constraint(self.input_file_name)
         dim =  constraints.get_ndim()
-        starting_point =  tuple(constraints.get_example())
-
-        # This will the step size with which the exploration starts.
+        starting_point =  constraints.get_example()
+        
+        # The starting_point is cast as a tuple since immutability is required to put it into the set of valid points .
+        self.point_set.add(tuple(starting_point))
+        
+        # This is the step size with which the exploration starts.
         step_size = 1.0
 
-        # Setup the set to mark points that are explored and a queue to hold the points that need to be explored
+        # Setup a queue to hold the points that need to be explored
         points_queue = deque()
         
         # Run while number of points found is less than the number of points requested
         while len(self.point_set) < n_points:
-           
-            # Search will begin from the given sample point so add it to the queue.
-            points_queue.append(starting_point)
-            
+
             # Break if the step size becomes smaller than the min_step_size.
             # This will typically happen when the valid points are too close to the sample point or the number of points requested is too large.
             if step_size < min_step_size:
-                log_generator.warning(f'Step size: {step_size}, breaking search for more points')            
+                log_generator.warning(f'Step size is too small: {step_size}, breaking search')            
                 break
-
-            n_found = 0
+            
+            # Add the current set of found points to the queue of points that will be explored
+            for _ in self.point_set:
+                points_queue.append(_)
+            
+            
+            # Counter to count points found for a given step size.
+            n_new_points = 0
+            
             # Run while the queue exists and more points are required.
             while points_queue and len(self.point_set) < n_points:
-
-                # Get the current point from the queue.
-                # A tuple is used so it can be hashed and put into a set.
+                # The current point is the front of the queue.
                 current_point = points_queue.popleft()
-
-                # The search always starts from the given starting_point.
-                # After the first iteration of the while loop, the starting_point is in the self.point_set set.
-                # The current_point != starting_point condition is required to ensure that the search begins for every iteration.
-                if current_point != starting_point and current_point in self.point_set:
-                    continue
                 
-                # Explore in positive and negative direction for each dimension in the current point.
+                # Explore in positive and negative directions for each dimension in the current point.
                 for i_dim in range(dim):
                     for direction in [-1, +1]:
-                        # Cast as list because mutability is required to upudate the coordinates.
+                        # Cast as list because mutability is required to update the coordinates.
                         next_point = list(current_point)
                         next_point[i_dim]+=(direction*step_size)
                         
                         # Cast as tuple for hashability.
                         next_point = tuple(next_point)
                         
-                        # Add point to queue if the point is within the unit hypercube and constraints met.
+                        # Add point to queue if it is within the unit hypercube and constraints are met.
+                        # next_point is not added if it is a part of point_set since it will already be part of the queue
                         # If there is a ZeroDivisionError exception, a warning is logged.
-                        # Other exceptions are unexpected and are logged as errors.
+                        # Unexpected exceptions are logged as errors byt the script continues
                         try:
                             if self.unit_cube_check(next_point) and constraints.apply(next_point) and next_point not in self.point_set:
                                 points_queue.append(next_point)
@@ -89,31 +88,41 @@ class Generator:
                         except:
                             log_generator.error(f'{sys.exc_info()[1]}, point: {next_point}')
                 
-                # Once all valid points associated to the current point are added to the queue, the current point is marked as explored.
-                self.point_set.add(current_point)
-                n_found+=1
+                # Once all valid points associated to the current point are added to the queue, the current point added to set of found points.
+                if current_point not in self.point_set:
+                    self.point_set.add(current_point)
+                    n_new_points+=1
 
                 # End of inner while loop.
 
-            # Halve step_size after all points with current step_size within constraints are found and begin search again.
+            # Halve step_size after finding all valid points with current step_size.
             step_size /= 2
-
-            log_generator.debug(f'found: {n_found} with step size: {step_size}')
+            
+            # Log how many new points found with current step size
+            log_generator.debug(f'found: {n_new_points} with step size: {step_size}')
 
             # End of outer while loop.
 
-        # log the total number of points found
+        # Log the total number of points found
         log_generator.info(f'Total number of points found: {len(self.point_set)}')
-
 
 
     # Setup output file and write coordinates to it. File is closed automatically.
     def write_to_file(self, output_file_name):
+        # If file already exist, log that it will be overwritten
         if path.exists(output_file_name):
             log_generator.warning(f'{output_file_name} already exists, overwriting file')
+        
+        # Open file for writing and write set of points to it
         with open(output_file_name, "w") as out:
+            
+            # Use itr to remove the new line character for the last line
+            itr = 0
+            new_line = '\n'
             for _ in self.point_set:
-                out.write(" ".join(map(str, _))+'\n')
+                itr+=1
+                if itr == len(self.point_set): new_line=''
+                out.write(" ".join(map(str, _))+new_line)
 
         log_generator.info(f'Writing output: {self.input_file_name} -> {output_file_name}')
 
