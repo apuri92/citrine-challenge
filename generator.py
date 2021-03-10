@@ -5,6 +5,7 @@ from os import path
 import logging
 from setup_logging import setup_logger
 from math import sqrt
+from helpers import *
 
 setup_logger('log_generator.log')
 log_generator = logging.getLogger('log_generator.log')
@@ -76,8 +77,7 @@ class Generator:
                         # Cast as tuple for hashability.
                         next_point = tuple(next_point)
                         
-                        # Add point to queue if it is within the unit hypercube and constraints are met.
-                        # next_point is not added if it is a part of point_set since it will already be part of the queue
+                        # If next_point is within the unit hypercube, meets constraints, and is not already explored, add it to the queue.
                         # If there is a ZeroDivisionError exception, a warning is logged.
                         # Unexpected exceptions are logged as errors byt the script continues
                         try:
@@ -87,16 +87,19 @@ class Generator:
                             log_generator.warning(f'{sys.exc_info()[1]}, point: {next_point}')
                         except:
                             log_generator.error(f'{sys.exc_info()[1]}, point: {next_point}')
-                
+
                 # Once all valid points associated to the current point are added to the queue, the current point added to set of found points.
                 if current_point not in self.point_set:
                     self.point_set.add(current_point)
                     n_new_points+=1
+                    if len(self.point_set) % 50 == 0 or len(self.point_set) <= 50:
+                        PlotPoints(self.point_set, self.input_file_name.split("/")[-1][:-4],f'Points:{len(self.point_set)} Step size: {step_size}')
 
                 # End of inner while loop.
 
             # Halve step_size after finding all valid points with current step_size.
             step_size /= 2
+            PlotPoints(self.point_set, self.input_file_name.split("/")[-1][:-4],f'Points:{len(self.point_set)} Step size: {step_size}')
             
             # Log how many new points found with current step size
             log_generator.debug(f'found: {n_new_points} with step size: {step_size}')

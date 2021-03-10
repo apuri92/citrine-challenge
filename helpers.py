@@ -22,7 +22,7 @@ def PlotPoints3D(pointsExplored, filename, dim0=0, dim1=1, dim2=2):
     plt.savefig(f'./images/{filename}_len{len(pointsExplored)}')
 
 # Utility to plot points in 2D
-def PlotPoints(pointsExplored, filename, dim0=0, dim1=1):
+def PlotPoints(pointsExplored, filename, title, dim0=0, dim1=1):
     xs=[]
     ys=[]
     for _ in pointsExplored:
@@ -34,9 +34,11 @@ def PlotPoints(pointsExplored, filename, dim0=0, dim1=1):
     plt.ylim([0,1])
     plt.xlabel(f'x[{dim0}]')
     plt.ylabel(f'x[{dim1}]')
-    plt.title(f'Total points used = {len(pointsExplored)}')
+    plt.title(title)
     plt.savefig(f'./images/{filename}_len{len(pointsExplored)}')
-    plt.show()
+    plt.cla()
+    plt.clf()
+    # plt.show()
 
 # Utility to plot points in 2D
 def PlotPoints1D(pointsExplored, filename, dim0=0, dim1=1):

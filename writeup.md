@@ -21,7 +21,7 @@ The following log files are produced:
 * log_validator.log contains information from validating the output file
 
 ### Explanation
-The script starts with with the given feasible sample point and explores outward (incrementing and decrementing by a particular step size) in each dimension. Any valid points found are added to the queue explored and added to the set of valid points. This exploration is done till the queue is empty. The step size is then halved and the search is re-done on a queue that contains the valid points found so far.
+The script starts with the given feasible sample point and explores outward (incrementing and decrementing by a particular step size) in each dimension. Any valid points found are added to a queue. While the queue is non-empty, each point is popped off and explored at the same step size and valid points are added to queue. Each explored point is also added to the set of valid points. The step size is then halved and the search is re-done on a queue that contains the valid points found so far.
 
 ### Pseudocode
 ```
@@ -45,11 +45,11 @@ while (n_found_points < n_required_points):
     
 ```
 
-At the end of this loop, the exploredPoints set will contain the required number of valid points.
+At the end of this loop, the valid_points set will contain the required number of valid points.
 
-Since the exploration is done consistenly with a regular step-size, (1.0, 0.5, 0.25, 0.125…), the points found fill the valid space in a uniform manner.
+Since the exploration is done on the entire space at each step size, and the step size is consistently decreased (1.0, 0.5, 0.25, 0.125…), the points found fill the valid space in a uniform manner.
 
-The points collected from mixture.txt (and the order in which they are filled) are shown below.
+The points collected from mixture.txt (and the pattern in which they are filled) is shown below.
 ![mixture.gif](images/mixture.gif)
 
 ---
@@ -60,10 +60,10 @@ This code finds 1000 points in under 5 seconds for each given sample dataset.
 
 | Input Sample  | Time Taken    | Dimensions    | Points Generated  |
 | ---           | ---           | ---           | ---               |
-| mixture.txt   | 0.0088        | 2             | 1000              |
-| example.txt   | 0.0375        | 4             | 1000              |
-| formulation   | 0.0272        | 4             | 1000              |
-| alloy.txt     | 0.3253        | 11            | 1000              |
+| mixture.txt   | 0.xxxx        | 2             | 1000              |
+| example.txt   | 0.xxxx        | 4             | 1000              |
+| formulation   | 0.xxxx        | 4             | 1000              |
+| alloy.txt     | 0.xxxx        | 11            | 1000              |
 
 The memory usage for alloy.txt (calculated using [`memory-profiler`](https://pypi.org/project/memory-profiler/)) is shown below:
 ![memoryUsage](images/mprof_plot_alloys.png)
@@ -72,7 +72,7 @@ The memory usage for alloy.txt (calculated using [`memory-profiler`](https://pyp
 
 ## Drawbacks:
 * An initial point is required to begin the search
-* The memory footprint will be large for high dimensional problems where many points are required
+* All the points have to be put in a set so the memory footprint can be large for high dimensional problems where many points are required
 * The points filled at the smallest step size may not be uniform in all dimensions
 * If the valid region is discontinuous, all subregions may not be found
-* Floating point errors can happen
+* Floating point errors can happen if the point is close to 0

@@ -11,8 +11,8 @@ class Validator:
     Validator class to check output file against constraints in input file
     """
 
-    # checks output file against constraint file to see if required number of points available
-    def check_output_file(self, constraints_file, points_file, expected):
+    # validates output file against constraint file to see if required number of points available
+    def validate_output_file(self, constraints_file, points_file, expected):
         log_validator.info(f'running check: {constraints_file} <-> {points_file}')
         constraints = Constraint(constraints_file)
 
@@ -46,6 +46,6 @@ class Validator:
                 log_validator.warning(f'{generated} points less than expected {expected}')
             
             # Log summary for file
-            log_validator.info(f'{generated} generated, {expected} expected\n')
+            log_validator.info(f'{generated} generated, {expected} expected')
             log_validator.info(f'{passed} passed, {failed} failed')
 
