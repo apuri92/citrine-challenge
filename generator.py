@@ -1,7 +1,10 @@
 from constraints import Constraint
 from collections import deque
-import sys, logging
+import sys
+from os import path
+import logging
 from setup_logging import setup_logger
+from math import sqrt
 
 setup_logger('log_generator.log')
 log_generator = logging.getLogger('log_generator.log')
@@ -41,8 +44,6 @@ class Generator:
         
         # Run while number of points found is less than the number of points requested
         while len(self.point_set) < n_points:
-
-            log_generator.debug(f'step_size: {step_size}, valid points found: {len(self.point_set)}')
            
             # Search will begin from the given sample point so add it to the queue.
             points_queue.append(starting_point)
@@ -53,9 +54,10 @@ class Generator:
                 log_generator.warning(f'Step size: {step_size}, breaking search for more points')            
                 break
 
+            n_found = 0
             # Run while the queue exists and more points are required.
             while points_queue and len(self.point_set) < n_points:
-                
+
                 # Get the current point from the queue.
                 # A tuple is used so it can be hashed and put into a set.
                 current_point = points_queue.popleft()
@@ -89,21 +91,26 @@ class Generator:
                 
                 # Once all valid points associated to the current point are added to the queue, the current point is marked as explored.
                 self.point_set.add(current_point)
+                n_found+=1
 
                 # End of inner while loop.
 
             # Halve step_size after all points with current step_size within constraints are found and begin search again.
             step_size /= 2
 
+            log_generator.debug(f'found: {n_found} with step size: {step_size}')
+
             # End of outer while loop.
 
         # log the total number of points found
-        log_generator.info(f'Points found: {len(self.point_set)}')
+        log_generator.info(f'Total number of points found: {len(self.point_set)}')
 
 
 
     # Setup output file and write coordinates to it. File is closed automatically.
     def write_to_file(self, output_file_name):
+        if path.exists(output_file_name):
+            log_generator.warning(f'{output_file_name} already exists, overwriting file')
         with open(output_file_name, "w") as out:
             for _ in self.point_set:
                 out.write(" ".join(map(str, _))+'\n')

@@ -19,7 +19,7 @@ class Checker:
         with open(points_file) as f:
             failed = 0
             passed = 0
-            total = 0
+            generated = 0
             for itr, line in enumerate(f):
                 x=[float(_) for _ in line.strip().split(" ")]
                 
@@ -28,7 +28,7 @@ class Checker:
                     log_checker.debug(f'Checked {itr}')
                 
                 # Count number of points in file
-                total+=1
+                generated+=1
                 
                 # Count the number of passed/failed
                 try:
@@ -42,8 +42,10 @@ class Checker:
                     pass
                 
             # Log warning if number of points is less than expected
-            if total < expected:
-                log_checker.warning(f'{total} points less than expected {expected}')
+            if generated < expected:
+                log_checker.warning(f'{generated} points less than expected {expected}')
             
             # Log summary for file
-            log_checker.info(f'passed: {passed}, failed: {failed}, total: {total}, expected: {expected}\n')
+            log_checker.info(f'{passed} passed, {failed} failed')
+            log_checker.info(f'{generated} generated, {expected} expected\n')
+
