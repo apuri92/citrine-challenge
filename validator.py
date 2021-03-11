@@ -77,6 +77,8 @@ class Validator:
         
         if passed == expected or passed == generated:
             self.log.info(f'All points are valid')
-        
+
+        self.log.info(f'Validated {constraints_file_name} <-> {points_file_name}')
+
         self.log.info(f'-- Validation complete -- ')    
         return

@@ -2,4 +2,7 @@
 *.nb
 *.png
 *.log
+*.zip
+*.gif
+tmp.py
 __pycache__

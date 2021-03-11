@@ -5,12 +5,11 @@ from os import path
 import logging
 from setup_logging import setup_logger
 from math import sqrt, floor, log10
-from helpers import *
 
 
 class Generator:
     """
-    Generator class to generate output_file with required number of points that satisfy constraints in input_file
+    Generator class to generate output_file with required number of points that satisfy constraints in input_file.
     """
     
     def __init__(self, input_file_name):
@@ -29,35 +28,36 @@ class Generator:
         try:
             self.constraints = Constraint(self.input_file_name)
         except FileNotFoundError:
-            self.log.critical(f'Constraints file {self.input_file_name} not found.')
+            self.log.critical(f'Constraints file not found: {self.input_file_name}')
+        else:
+            self.log.info(f'Setup Generator for {self.input_file_name}')
 
         # Set and queue to hold and explore the required points
         self.point_set = set()
         self.points_queue = deque()
 
-        self.log.info(f'Setup Generator for {self.input_file_name}')
 
     # Generate_valid_points uses a form of breadth first search to generate n points satisfying the constraints defined in input_file_name.
     def generate_valid_points(self, n_points, min_step_size=1E-30):
         """
         Generate required number of points that satisfy constraints.
 
-        :param int n_points: Required number of points
-        :param float min_step_size: Optional minimum step size (default = 1E-30) for exploration
+        :param int n_points: Required number of points.
+        :param float min_step_size: Optional minimum step size (default = 1E-30) for exploration.
         """
         
-        # Return if constraints do not exist
+        # Return if constraint file is unavailable
         try:
-            constraints
+            self.constraints
         except NameError:
-            self.log.critical(f'Constraints file {self.input_file_name} not found. Skipping generation...')
+            self.log.critical(f'Constraints file not found {self.input_file_name} not found. Terminating generation...')
             return
 
         self.log.info(f'Points required: {n_points}, min_step_size: {min_step_size}')
-        self.log.info(f'Constraints: {self.input_file_name}')
+        self.log.info(f'Constraints file: {self.input_file_name}')
         
         # Cast as a tuple since immutability is required to put into a set.
-        self.point_set.add(tuple(constraints.get_example()))
+        self.point_set.add(tuple(self.constraints.get_example()))
         
         # Initial step size for exploration.
         step_size = 1.0
@@ -65,7 +65,7 @@ class Generator:
         # Run while more points are required.
         while len(self.point_set) < n_points:
             
-            # Add all valid points to the queue for exploration
+            # Add all valid points to the queue for exploration.
             for _ in self.point_set:
                 self.points_queue.append(_)
             
@@ -77,25 +77,21 @@ class Generator:
                 
                 # Explore outward from each point in the queue and add the found valid points to the queue and set.
                 current_point = self.points_queue.popleft()
-                n_new_points += self.explore_point(current_point, step_size, n_points, constraints)
-
-                # PlotPoints(self.point_set, self.input_file_name.split("/")[-1][:-4]+"_eachExploration",f'Points:{len(self.point_set)} Step size: {step_size}')
-                # End inner while loop
+                n_new_points += self.explore_point(current_point, step_size, n_points, self.constraints)
                 
-            # PlotPoints(self.point_set, self.input_file_name.split("/")[-1][:-4]+"_eachStepSize",f'Points:{len(self.point_set)} Step size: {step_size}')
+                # End inner while loop: Done with finding points at given step size
 
             self.log.debug(f'Found: {n_new_points} with step size: {step_size}, total in set: {len(self.point_set)}')
 
-            # Decrease step_size and search again from points already found.
-            # Break if the step size becomes smaller than the min_step_size.
+            # Decrease step_size and search again.
             step_size /= 2
             if step_size < min_step_size:
                 self.log.warning(f'Step size is too small: {step_size}, breaking search')            
                 break
 
-            # End outer while loop: Done with finding required number of points
+            # End outer while loop: Done with finding required number of points.
 
-        self.log.info(f'Total number of points found: {len(self.point_set)}')
+        self.log.info(f'Points found: {len(self.point_set)}')
         self.log.info(f'-- Generation complete -- ')
         return
 
@@ -125,23 +121,16 @@ class Generator:
                     if self.unit_cube_check(next_point) and constraints.apply(next_point) and next_point not in self.point_set:
                         self.points_queue.append(next_point)
                         self.point_set.add(next_point)
-                        self.point_list.append(next_point)
                         found_points+=1
-
-                        # itr = len(self.point_set)
-                        # if itr !=0 and (itr % pow(10, floor(log10(itr+1))) == 0):
-                        #     PlotPoints(self.point_set, self.input_file_name.split("/")[-1][:-4]+"_logarithmicNPoints",f'Points:{len(self.point_set)} Step size: {step_size}')
-                        # PlotPoints(self.point_set, self.input_file_name.split("/")[-1][:-4]+"_eachStepSize",f'Points:{len(self.point_set)} Step size: {step_size}')
-
                 # ZeroDivisionError exception is logged as a warning and the script continues.
                 except ZeroDivisionError:
                     self.log.warning(f'{sys.exc_info()[1]}, point: {next_point}')
 
-                # Unexpected exceptions are logged as errors and the script continues
+                # Unexpected exceptions are logged as errors and the script continues.
                 except:
                     self.log.error(f'{sys.exc_info()}, point: {next_point}')
                 
-                # Return if the number of required points are found
+                # Return if the number of required points are found.
                 if len(self.point_set) == n_points:
                     return found_points
         
@@ -157,22 +146,22 @@ class Generator:
 
         # If constraint file was not found, point_set is empty so there is nothing to write.
         if len(self.point_set) == 0:
-            self.log.error(f'No points generated for {self.input_file_name}. Skip writing to {output_file_name}...')
+            self.log.error(f'No points generated for {self.input_file_name}. Terminating writing to {output_file_name}...')
             return
         
         self.log.info(f'Writing: {self.input_file_name} -> {output_file_name}')
         
-        # Warn if file already exists.
+        # Warn if file already exists and will be overwritten.
         if path.exists(output_file_name):
             self.log.warning(f'{output_file_name} already exists, overwriting file')
         
         
         # Open file for writing and write set of points to it.
-        # Use an iterator to remove the new line character from the last line
+        # Use an iterator to remove the new line character from the last line.
         with open(output_file_name, "w") as output_file:
             itr = 0
             new_line = '\n'
-            for _ in self.point_set:
+            for point in self.point_set:
                 itr+=1
                 if itr == len(self.point_set): new_line=''
                 output_file.write(" ".join(map(str, point))+new_line)
