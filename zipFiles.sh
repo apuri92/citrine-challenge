@@ -1,0 +1,1 @@
+zip -r -X Solution_Puri.zip writeup.md prompt.pdf validator.py setup_logging.py sampler.py generator.py constraints.py images/mprof_plot_alloys.png images/mixture.gif data/simple.txt data/alloy.txt data/example.txt data/formulation.txt data/mixture.txt

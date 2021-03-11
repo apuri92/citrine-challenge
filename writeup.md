@@ -23,6 +23,7 @@ The following log files are produced:
 * log_generator.log: information from point generation
 * log_validator.log: information from validation
 
+The provided data files are in the data folder.
 
 ### Explanation
 * The script starts with the given feasible sample point and explores outward (incrementing and decrementing by a particular step size) in each dimension. Any valid points found are added to a queue and set of found points.
@@ -33,9 +34,9 @@ The following log files are produced:
 
 ### Pseudocode
 ```
-step_size = 1
+step_size = 1.0
 while (n_found_points < n_required_points):
-    queue.append(all points in valid_points)
+    queue.append(all known valid points)
 
 	while queue and (n_found_points < n_required_points):
         current_point = queue.popleft()
@@ -52,8 +53,8 @@ while (n_found_points < n_required_points):
 ![mixture.gif](images/mixture.gif)
 
 ### Timing and Memory
-* The timing (calculated using the [`time`](https://docs.python.org/3/library/time.html) library)
-This code finds 1000 points spread over the sample space in under 1 seconds for each given sample dataset. 
+* The timing (calculated using the [`time`](https://docs.python.org/3/library/time.html) library) is shown.
+This algorithm finds 1000 points spread over the sample space in under 1 second for each given sample dataset. 
 
 | Input Sample      | Time Taken    | Dimensions    | Points Generated  |
 | ---               | ---           | ---           | ---               |
@@ -66,12 +67,12 @@ The memory usage for alloy.txt (calculated using [`memory-profiler`](https://pyp
 ![memoryUsage](images/mprof_plot_alloys.png)
 
 ### Advantages:
-* The algorithm is very fast and does not take up a lot of memory (see above)
-* The step size is consistently decreased (1.0, 0.5, 0.25, 0.125…) and the points found fill the valid space in a uniformly
+* The algorithm is very fast and does not take up a lot of memory (see above).
+* The step size is consistently decreased (1.0, 0.5, 0.25, 0.125…) and the points found fill the valid space uniformly.
 
 ### Drawbacks:
-* An initial point is required to begin the search
-* Very high dimensional problems with a small regions of validity may not be explored uniformly in all dimensions
-* The points filled at the smallest step size may not be uniform in all dimensions
-* If the valid region is discontinuous, all subregions may not be found
-* The given starting point can influence the points that are found by the script
+* An initial point is required to begin the search.
+* High dimensional problems with restricted regions of validity may not be explored uniformly in all dimensions.
+* The points filled at the smallest step size may not be uniform in all dimensions.
+* If the valid region is discontinuous, all subregions may not be found.
+* The given starting point can influence the points that are found by the script.
