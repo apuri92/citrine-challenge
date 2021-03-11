@@ -28,7 +28,7 @@ The provided data files are in the data folder.
 ### Explanation
 * The script starts with the given feasible sample point and explores outward (incrementing and decrementing by a particular step size) in each dimension. Any valid points found are added to a queue and set of found points.
 * While the queue is non-empty, each point is popped off and explored at the same step size and valid points are added to queue and set.
-* The step size is then halved and the search is re-done on a queue that contains the valid points found thus far.
+* The step size is then halved, the points found so far are added to a queue, and the search is re-done.
 * This process is repeated till the required number of points are found
 
 
