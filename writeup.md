@@ -76,3 +76,4 @@ The memory usage for alloy.txt (calculated using [`memory-profiler`](https://pyp
 * The points filled at the smallest step size may not be uniform in all dimensions
 * If the valid region is discontinuous, all subregions may not be found
 * Floating point errors can happen if the point is close to 0
+* The given starting point influences the points that are found by the script

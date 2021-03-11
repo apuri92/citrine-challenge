@@ -1,5 +1,6 @@
 from mpl_toolkits import mplot3d
 import matplotlib.pyplot as plt
+#Usage: PlotPoints(self.point_set, self.input_file_name.split("/")[-1][:-4],f'Points:{len(self.point_set)} Step size: {step_size}')
 
 # Utility to plot points in 3D
 def PlotPoints3D(pointsExplored, filename, dim0=0, dim1=1, dim2=2):
@@ -20,6 +21,8 @@ def PlotPoints3D(pointsExplored, filename, dim0=0, dim1=1, dim2=2):
     # plt.show()
     plt.title(f'Total points used = {len(pointsExplored)}')
     plt.savefig(f'./images/{filename}_len{len(pointsExplored)}')
+    plt.cla()
+    plt.clf()
 
 # Utility to plot points in 2D
 def PlotPoints(pointsExplored, filename, title, dim0=0, dim1=1):
@@ -55,4 +58,6 @@ def PlotPoints1D(pointsExplored, filename, dim0=0, dim1=1):
     plt.ylabel(f'x[{dim1}]')
     plt.title(f'Total points used = {len(pointsExplored)}')
     plt.savefig(f'./images/{filename}_len{len(pointsExplored)}')
-    plt.show()    
+    # plt.show()
+    plt.cla()
+    plt.clf()
