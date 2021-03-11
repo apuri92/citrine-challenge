@@ -54,11 +54,11 @@ class Generator:
             return
 
         self.log.info(f'Points required: {n_points}, min_step_size: {min_step_size}')
-        self.log.info(f'Constraints file: {self.input_file_name}')
+        self.log.info(f'Constraints file: {self.input_file_name} Dimension: {self.constraints.get_ndim()} Starting point: {self.constraints.get_example()}')
         
         # Cast as a tuple since immutability is required to put into a set.
         self.point_set.add(tuple(self.constraints.get_example()))
-        
+
         # Initial step size for exploration.
         step_size = 1.0
         
