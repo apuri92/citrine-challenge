@@ -63,7 +63,7 @@ This algorithm finds 1000 points spread over the sample space in under 1 second 
 | formulation.txt   | 0.09594       | 4             | 1000              |
 | alloy.txt         | 0.16853       | 11            | 1000              |
 
-The memory usage for alloy.txt (calculated using [`memory-profiler`](https://pypi.org/project/memory-profiler/)) is shown below:
+* The memory usage for alloy.txt (calculated using [`memory-profiler`](https://pypi.org/project/memory-profiler/)) is shown below:
 ![memoryUsage](images/mprof_plot_alloys.png)
 
 ### Advantages:
